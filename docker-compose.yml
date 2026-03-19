@@ -1,0 +1,76 @@
+services:
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      AC_REDIS_URL: redis://redis:6379/0
+      AC_DB_PATH: /data/retailer_checker.db
+      AC_OUTPUT_DIR: /data/output
+      AC_HEADLESS: "true"
+    volumes:
+      - backend_data:/data
+      - ./backend:/app   # live reload in dev
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: uvicorn api_checker.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      AC_REDIS_URL: redis://redis:6379/0
+      AC_DB_PATH: /data/retailer_checker.db
+      AC_OUTPUT_DIR: /data/output
+      AC_HEADLESS: "true"
+    volumes:
+      - backend_data:/data
+      - ./backend:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: >
+      celery -A api_checker.tasks:celery_app worker
+      --loglevel=info
+      --concurrency=2
+      --pool=solo
+
+  flower:
+    image: mher/flower:2.0
+    ports:
+      - "5555:5555"
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  redis_data:
+  backend_data:
