@@ -171,6 +171,7 @@ async def capture_network_traffic(
             break
 
     await page.wait_for_timeout(wait_ms)
+    await asyncio.sleep(0.5)  # Let in-flight async response handlers complete
     return captured
 
 

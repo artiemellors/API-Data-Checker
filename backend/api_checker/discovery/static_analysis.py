@@ -76,6 +76,11 @@ EXTRACTION_PATTERNS: dict[str, re.Pattern] = {
     ),
     # Stripe
     "stripe_publishable_key": re.compile(r'\bpk_(?:live|test)_[A-Za-z0-9]{24,}\b'),
+    # Braze
+    "braze_api_key": re.compile(
+        r'(?:appboy|braze)[^;]{0,100}api[_-]?key["\s:=\']+([A-Za-z0-9\-]{20,50})',
+        re.IGNORECASE,
+    ),
     # Generic API base URL
     "generic_api_base": re.compile(
         r'https://[a-zA-Z0-9][a-zA-Z0-9.\-]+\.[a-z]{2,6}'

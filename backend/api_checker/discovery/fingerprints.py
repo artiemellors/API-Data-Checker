@@ -425,6 +425,40 @@ FINGERPRINTS: list[Fingerprint] = [
         response_indicators=["session_id", "client_token"],
         default_confidence=0.88,
     ),
+    # ── Customer Engagement ────────────────────────────────────────────────────
+    Fingerprint(
+        service_name="braze",
+        category="customer-engagement",
+        url_patterns=[r"appboycdn\.com", r"braze\.com/api"],
+        js_patterns=[r"appboy", r"braze\.initialize", r"js\.appboycdn\.com", r"Braze\."],
+        response_indicators=["device_id", "api_key"],
+        key_extraction_map={"braze_api_key": "api_key"},
+        default_confidence=0.88,
+    ),
+    # ── CDN / Performance ─────────────────────────────────────────────────────
+    Fingerprint(
+        service_name="yottaa",
+        category="cdn",
+        url_patterns=[r"yottaa\.com", r"yottaa\.net"],
+        js_patterns=[r"yottaa", r"rapid\.yottaa", r"YottaaConfig"],
+        default_confidence=0.80,
+    ),
+    # ── Surveys ───────────────────────────────────────────────────────────────
+    Fingerprint(
+        service_name="survicate",
+        category="surveys",
+        url_patterns=[r"survicate\.com"],
+        js_patterns=[r"survicate", r"Survicate\.load", r"survicate-cdn"],
+        default_confidence=0.85,
+    ),
+    # ── Monitoring ────────────────────────────────────────────────────────────
+    Fingerprint(
+        service_name="new-relic",
+        category="monitoring",
+        url_patterns=[r"nr-data\.net", r"js-agent\.newrelic\.com"],
+        js_patterns=[r"NREUM", r"newrelic\.agent", r"nr-spa"],
+        default_confidence=0.85,
+    ),
 ]
 
 # Compile all patterns at module load

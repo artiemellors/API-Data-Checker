@@ -137,13 +137,17 @@ async def _run_scan(
         try:
             from .discovery.static_analysis import download_js_bundles, extract_from_js
             import httpx
+            from urllib.parse import urlparse as _urlparse
+
+            _parsed = _urlparse(url)
+            js_base_url = f"{_parsed.scheme}://{_parsed.netloc}"
 
             async with httpx.AsyncClient(
                 timeout=settings.http_timeout_s,
                 follow_redirects=True,
                 headers={"User-Agent": settings.user_agent},
             ) as client:
-                bundles = await download_js_bundles(url, client)
+                bundles = await download_js_bundles(js_base_url, client)
 
             for _script_url, content in bundles:
                 for key, values in extract_from_js(content).items():
@@ -159,12 +163,15 @@ async def _run_scan(
 
             matcher = FingerprintMatcher()
             services = matcher.match(endpoints, js_extractions)
+            for svc in services:
+                svc.scan_id = scan_id
 
             recognizer = GenericApiRecognizer()
-            known_urls = {svc.service_name for svc in services}
+            known_names = {svc.service_name for svc in services}
             for ep in endpoints:
                 result = recognizer.classify(ep)
-                if result and result.service_name not in known_urls:
+                if result and result.service_name not in known_names:
+                    result.scan_id = scan_id
                     services.append(result)
 
             for svc in services:
