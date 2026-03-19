@@ -14,7 +14,6 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
     "lucide-react": "^0.390.0",
-    "@radix-ui/react-badge": "^1.0.0",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-progress": "^1.0.3",
     "@radix-ui/react-separator": "^1.0.3",
