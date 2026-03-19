@@ -45,7 +45,9 @@ celery_app.conf.update(
 def _publish(scan_id: str, event: dict) -> None:
     """Synchronously publish a progress event to Redis pub/sub."""
     try:
-        r = sync_redis.from_url(settings.redis_url, decode_responses=True)
+        url = settings.redis_url.split("?")[0]
+        ssl_opts = {"ssl_cert_reqs": None} if url.startswith("rediss://") else {}
+        r = sync_redis.from_url(url, decode_responses=True, **ssl_opts)
         r.publish(f"scan:{scan_id}", json.dumps(event))
         r.close()
     except Exception as exc:

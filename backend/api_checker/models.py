@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import AliasChoices, BaseModel, Field, field_validator
 
 
 # ─── API Request / Response Models ───────────────────────────────────────────
@@ -38,7 +38,7 @@ class BatchScanRequest(BaseModel):
 
 
 class ScanResponse(BaseModel):
-    scan_id: str
+    scan_id: str = Field(validation_alias=AliasChoices("scan_id", "id"))
     url: str
     domain: str
     status: Literal["pending", "running", "completed", "failed"]
